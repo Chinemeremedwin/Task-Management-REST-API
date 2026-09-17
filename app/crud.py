@@ -1,7 +1,7 @@
 from sqlmodel import Session,select
 
-from models import Task
-from schemas import TaskCreate
+from app.models import Task
+from app.schemas import TaskCreate
 
 #---CREATE---
 def create_task(session: Session, task_data: TaskCreate):
@@ -23,7 +23,7 @@ def get_tasks(session: Session):
      results = session.exec(statement)
      return results.all()
 
-def get_tasks(session: Session, task_id: int):
+def get_task(session: Session, task_id: int):
      statement = select(Task).where(Task.id == task_id)
      result = session.exec(statement).first()
      if not result:
@@ -32,3 +32,43 @@ def get_tasks(session: Session, task_id: int):
 
 
 #---UPDATE--
+def update_tasks(session: Session, task_id: int,task_data: TaskCreate):
+     task = get_task(session,task_id)
+     if not task:
+          return None
+     task.title = task_data.title
+     task.description = task_data.description 
+     task.priority = task_data.priority
+     session.add(task)
+     session.commit()
+     session.refresh(task)
+     return task
+
+
+#--DELETE--
+def delete_task(session: Session, task_id: int):
+     task = get_task(session, task_id)
+     if not task:
+          return None
+     Session.delete(task)
+     session.commit()
+     return {"Message": "Task deleted succesfully"}
+
+
+#---Mark---
+def complete_task(session: Session, task_id: int):
+     task = get_task(session, task_id)
+     if not task:
+          return None
+     task.status = "Completed"
+     session.add(task)
+     session.commit()
+     session.refresh(task)
+
+     return task
+
+#---FILTER TASK
+def get_task_by_status(session: Session, status: str):
+     statement = select(Task).where(Task.status == status)
+     results = session.exec(statement)
+     return results. all()
