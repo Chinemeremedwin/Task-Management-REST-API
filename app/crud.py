@@ -11,6 +11,15 @@ def create_task(session: Session, task_data: TaskCreate):
     session.refresh(task)
     return task
 
+#--GET-ONE-TASK--
+def get_task(session, task_id):
+     return session .get(Task,task_id)
+
+
+
+
+
+
 #---READ---#
 def create_task(session: Session, task_data: TaskCreate):
      task = Task(**task_data.model_dump())
@@ -32,7 +41,7 @@ def get_task(session: Session, task_id: int):
 
 
 #---UPDATE--
-def update_tasks(session: Session, task_id: int,task_data: TaskCreate):
+def update_task(session: Session, task_id: int,task_data: TaskCreate):
      task = get_task(session,task_id)
      if not task:
           return None
@@ -50,7 +59,7 @@ def delete_task(session: Session, task_id: int):
      task = get_task(session, task_id)
      if not task:
           return None
-     Session.delete(task)
+     session.delete(task)
      session.commit()
      return {"Message": "Task deleted succesfully"}
 
@@ -67,8 +76,20 @@ def complete_task(session: Session, task_id: int):
 
      return task
 
-#---FILTER TASK
+#---FILTER TASK 
 def get_task_by_status(session: Session, status: str):
      statement = select(Task).where(Task.status == status)
      results = session.exec(statement)
      return results. all()
+
+
+#--PATCH--
+def complete_task(session, task_id):
+     task = session.get(Task,task_id)
+     if not task:
+          return None
+     task.status = "Completed"
+     session.add(task)
+     session.commit()
+     session.refresh(task)
+     return task
